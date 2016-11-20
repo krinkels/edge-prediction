@@ -11,14 +11,20 @@ def loadWikiGraph():
     """
     return snap.LoadEdgeList(snap.PNGraph, "datasets/wiki-Vote.txt", 0, 1, "\t")
 
-def generateExamples(graph, testProportion=0.1, seed=0):
+def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     """
-    Generates testing and training examples for node pairs from the given graph
+    Generates testing and training examples for node pairs from the given graph. Outputs
+    results to text file at 'filename' if filename is not None. Each line is formatted as
+
+    feature_1 ... feature_n classification
+
+    with a newline separating the training examples from the testing examples
 
     Args:
         graph (snap.TNGraph or snap.TUNGraph) : the graph to generate examples from
         testingProportion (float) : the proportion of edges to use in the testing set
         seed (hashable) : a seed for the random number generator
+        filename (string) : file location to write results to
 
     Returns:
         A tuple of training and testing examples of the form
@@ -53,5 +59,20 @@ def generateExamples(graph, testProportion=0.1, seed=0):
     nonEdgeExamples = [ (featureextraction.extractFeatures(graph, pair[0], pair[1]), 0) for pair in nodePairs ]
     trainingExamples += nonEdgeExamples[:splitIndex]
     testingExamples += nonEdgeExamples[splitIndex:]
+
+    # Write the examples to a file if necessary
+    if filename is not None:
+        try:
+            f = open(filename, 'w')
+            for example in trainingExamples:
+                f.write(" ".join([ str(val) for val in example[0] + [example[1]] ]))
+                f.write("\n")
+            f.write("\n")
+            for example in testingExamples:
+                f.write(" ".join([ str(val) for val in example[0] + [example[1]] ]))
+                f.write("\n")
+            f.close()
+        except IOError as e:
+            print "Error writing to file {0}: {1}".format(filename, e.strerror)
 
     return (trainingExamples, testingExamples)
