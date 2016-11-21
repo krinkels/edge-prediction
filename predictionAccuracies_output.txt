@@ -54,3 +54,12 @@ HEPhysicsTheory: Percent Correct: 93.256
  
 Training with Wiki Dataset:
 Using SVM
+Wiki: Percent Correct: 90.529
+AstroPhysics: Percent Correct: 74.888
+CondensedMatter: Percent Correct: 84.152
+GeneralRelativity: Percent Correct: 84.041
+HEPhysics: Percent Correct: 82.748
+HEPhysicsTheory: Percent Correct: 82.596
+ 
+Training with AstroPhysics Dataset:
+Using SVM
