@@ -1,6 +1,7 @@
 import snap
 import random
 import featureextraction
+import numpy as np
 
 def loadWikiGraph():
     """
@@ -37,10 +38,12 @@ def generateExamples(graph, testProportion=0.1, seed=0):
     # First, partition existing edges in training and testing sets
     splitIndex = graph.GetEdges() - int(graph.GetEdges() * testProportion)
 
-    examples = [ (featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId()), 1) for edge in graph.Edges() ]
-    random.shuffle(examples)
-    trainingExamples = examples[:splitIndex]
-    testingExamples = examples[splitIndex:]
+    examplesX = [ featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId()) for edge in graph.Edges() ]
+    examplesY = np.ones(int(graph.GetEdges()))
+
+    random.shuffle(examplesX)
+    trainingExamplesX = examplesX[:splitIndex]
+    testingExamplesX = examplesX[splitIndex:]
 
     # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
     nodeIDs = [ node.GetId() for node in graph.Nodes() ]
@@ -50,8 +53,12 @@ def generateExamples(graph, testProportion=0.1, seed=0):
         if not graph.IsEdge(pair[0], pair[1]):
             nodePairs.add(pair)
 
-    nonEdgeExamples = [ (featureextraction.extractFeatures(graph, pair[0], pair[1]), 0) for pair in nodePairs ]
-    trainingExamples += nonEdgeExamples[:splitIndex]
-    testingExamples += nonEdgeExamples[splitIndex:]
+    nonEdgeExamplesX = [ featureextraction.extractFeatures(graph, pair[0], pair[1]) for pair in nodePairs ]
+    nonEdgeExamplesY = np.zeros(int(graph.GetEdges()))
 
-    return (trainingExamples, testingExamples)
+    trainingExamplesX += nonEdgeExamplesX[:splitIndex]
+    testingExamplesX  += nonEdgeExamplesX[splitIndex:]
+    trainingExamplesY =  np.concatenate((examplesY[:splitIndex],nonEdgeExamplesY[:splitIndex]), axis = 0)
+    testingExamplesY  =  np.concatenate((examplesY[splitIndex:],nonEdgeExamplesY[splitIndex:]), axis = 0)
+
+    return (trainingExamplesX,trainingExamplesY, testingExamplesX, testingExamplesY)
