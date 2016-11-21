@@ -1,0 +1,54 @@
+Training with Wiki Dataset:
+Using neural network
+Wiki: Percent Correct: 93.374
+AstroPhysics: Percent Correct: 98.055
+CondensedMatter: Percent Correct: 97.657
+GeneralRelativity: Percent Correct: 94.255
+HEPhysics: Percent Correct: 97.144
+HEPhysicsTheory: Percent Correct: 93.227
+ 
+Training with AstroPhysics Dataset:
+Using neural network
+Wiki: Percent Correct: 57.702
+AstroPhysics: Percent Correct: 98.475
+CondensedMatter: Percent Correct: 97.539
+GeneralRelativity: Percent Correct: 94.220
+HEPhysics: Percent Correct: 97.949
+HEPhysicsTheory: Percent Correct: 93.160
+ 
+Training with CondensedMatter Dataset:
+Using neural network
+Wiki: Percent Correct: 57.759
+AstroPhysics: Percent Correct: 97.974
+CondensedMatter: Percent Correct: 97.668
+GeneralRelativity: Percent Correct: 94.255
+HEPhysics: Percent Correct: 97.460
+HEPhysicsTheory: Percent Correct: 93.227
+ 
+Training with GeneralRelativity Dataset:
+Using neural network
+Wiki: Percent Correct: 61.666
+AstroPhysics: Percent Correct: 96.616
+CondensedMatter: Percent Correct: 97.598
+GeneralRelativity: Percent Correct: 94.237
+HEPhysics: Percent Correct: 97.369
+HEPhysicsTheory: Percent Correct: 93.208
+ 
+Training with HEPhysics Dataset:
+Using neural network
+Wiki: Percent Correct: 53.872
+AstroPhysics: Percent Correct: 98.302
+CondensedMatter: Percent Correct: 97.531
+GeneralRelativity: Percent Correct: 94.237
+HEPhysics: Percent Correct: 97.880
+HEPhysicsTheory: Percent Correct: 93.217
+ 
+Training with HEPhysicsTheory Dataset:
+Using neural network
+Wiki: Percent Correct: 59.052
+AstroPhysics: Percent Correct: 93.084
+CondensedMatter: Percent Correct: 97.341
+GeneralRelativity: Percent Correct: 94.134
+HEPhysics: Percent Correct: 95.163
+HEPhysicsTheory: Percent Correct: 93.236
+ 
