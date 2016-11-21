@@ -1,0 +1,56 @@
+Training with Wiki Dataset:
+Using logistic regression
+Wiki: Percent Correct: 92.790
+AstroPhysics: Percent Correct: 81.988
+CondensedMatter: Percent Correct: 97.138
+GeneralRelativity: Percent Correct: 86.008
+HEPhysics: Percent Correct: 65.345
+HEPhysicsTheory: Percent Correct: 92.207
+ 
+Training with AstroPhysics Dataset:
+Using logistic regression
+Wiki: Percent Correct: 65.938
+AstroPhysics: Percent Correct: 97.617
+CondensedMatter: Percent Correct: 93.182
+GeneralRelativity: Percent Correct: 87.802
+HEPhysics: Percent Correct: 96.108
+HEPhysicsTheory: Percent Correct: 83.616
+ 
+Training with CondensedMatter Dataset:
+Using logistic regression
+Wiki: Percent Correct: 68.803
+AstroPhysics: Percent Correct: 97.964
+CondensedMatter: Percent Correct: 97.662
+GeneralRelativity: Percent Correct: 94.255
+HEPhysics: Percent Correct: 96.179
+HEPhysicsTheory: Percent Correct: 93.227
+ 
+Training with GeneralRelativity Dataset:
+Using logistic regression
+Wiki: Percent Correct: 72.878
+AstroPhysics: Percent Correct: 96.365
+CondensedMatter: Percent Correct: 97.609
+GeneralRelativity: Percent Correct: 94.255
+HEPhysics: Percent Correct: 95.350
+HEPhysicsTheory: Percent Correct: 93.227
+ 
+Training with HEPhysics Dataset:
+Using logistic regression
+Wiki: Percent Correct: 60.706
+AstroPhysics: Percent Correct: 98.451
+CondensedMatter: Percent Correct: 97.435
+GeneralRelativity: Percent Correct: 94.168
+HEPhysics: Percent Correct: 97.886
+HEPhysicsTheory: Percent Correct: 93.073
+ 
+Training with HEPhysicsTheory Dataset:
+Using logistic regression
+Wiki: Percent Correct: 72.801
+AstroPhysics: Percent Correct: 86.523
+CondensedMatter: Percent Correct: 96.552
+GeneralRelativity: Percent Correct: 93.772
+HEPhysics: Percent Correct: 89.705
+HEPhysicsTheory: Percent Correct: 93.256
+ 
+Training with Wiki Dataset:
+Using SVM
