@@ -2,8 +2,12 @@ import snap
 import random
 import featureextraction
 import numpy as np
+import sys
 
-def loadWikiGraph():
+#List of all filenames, which appear in the load_() functions
+allFileNames = ['Wiki','AstroPhysics','CondensedMatter','GeneralRelativity','HEPhysics','HEPhysicsTheory']
+
+def loadWiki():
     """
     Loads the Wikipedia vote graph
 
@@ -112,19 +116,61 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     trainingExamplesY =  np.concatenate((examplesY[:splitIndex],nonEdgeExamplesY[:splitIndex]), axis = 0)
     testingExamplesY  =  np.concatenate((examplesY[splitIndex:],nonEdgeExamplesY[splitIndex:]), axis = 0)
 
+    #Instead of empty space between training and testing sets, write -1's.
+    #This is used as a flag to easily find separation between data sets
+    #while using np.genfromtext()
+    (length,numFeatures) = np.shape(trainingExamplesX)
+    separator = np.zeros(numFeatures) - 1
+
     # Write the examples to a file if necessary
+    #Note that the features are written to a .features file, and the
+    #labels are written to a .labels file
     if filename is not None:
         try:
-            f = open(filename, 'w')
-            for example in trainingExamples:
-                f.write(" ".join([ str(val) for val in example[0] + [example[1]] ]))
+            f = open(filename + '.features', 'w')
+            for example in trainingExamplesX:
+                f.write(" ".join([ str(val) for val in example]))
                 f.write("\n")
+            f.write(" ".join([ str(val) for val in separator]))
             f.write("\n")
-            for example in testingExamples:
-                f.write(" ".join([ str(val) for val in example[0] + [example[1]] ]))
+            for example in testingExamplesX:
+                f.write(" ".join([ str(val) for val in example ]))
                 f.write("\n")
             f.close()
+
+            f = open(filename + '.labels', 'w')
+            for example in trainingExamplesY:
+                f.write(str(example))
+                f.write("\n")
+            f.write("-1\n")
+            for example in testingExamplesY:
+                f.write(str(example))
+                f.write("\n")
+            f.close()
+
         except IOError as e:
             print "Error writing to file {0}: {1}".format(filename, e.strerror)
-   
+        
     return (trainingExamplesX,trainingExamplesY, testingExamplesX, testingExamplesY)
+
+
+def generateFeatureFiles(filenames=None):
+    """
+    Generates the text files for given data sets.
+    
+    Args:
+        filenames:  List of filenames which must names in allFileNames and have an associated load method
+                    If no argument is given, generate the feature files for all data sets
+    """
+    if filenames is None: 
+        filenames = allFileNames
+    for fn in filenames:
+        if fn in allFileNames:
+            print "Generating feature files for: " + fn
+            sys.stdout.flush()
+            exec('graph = load' + fn + '()')
+            generateExamples(graph,filename = 'featureFiles/' + fn)
+            sys.stdout.flush()
+    
+        else:
+            print "Error generating feature files for: " + fn

@@ -61,12 +61,12 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
     # Basic feature extraction
     features[SRC_D_IN] = srcNode.GetInDeg()
     features[SRC_D_OUT] = srcNode.GetOutDeg()
-    features[SRC_IN_OUT] = features[SRC_D_IN] * 1.0 / features[SRC_D_OUT]
-    features[SRC_OUT_IN] = features[SRC_D_OUT] * 1.0 / features[SRC_D_IN]
+    features[SRC_IN_OUT] = features[SRC_D_IN]  * 1.0 / (1.0 + features[SRC_D_OUT]) #Add 1 to denominator so we don't divide by 0
+    features[SRC_OUT_IN] = features[SRC_D_OUT] * 1.0 / (1.0 + features[SRC_D_IN])
     features[DST_D_IN] = dstNode.GetInDeg()
     features[DST_D_OUT] = dstNode.GetOutDeg()
-    features[DST_IN_OUT] = features[DST_D_IN] * 1.0 / features[DST_D_OUT]
-    features[DST_OUT_IN] = features[DST_D_OUT] * 1.0 / features[DST_D_IN]
+    features[DST_IN_OUT] = features[DST_D_IN]  * 1.0 / (1.0 + features[DST_D_OUT])
+    features[DST_OUT_IN] = features[DST_D_OUT] * 1.0 / (1.0 + features[DST_D_IN])
 
     # Path lengths. Set to sys.maxint if no path exists
     #srcDstPath = snap.GetShortPath(graph, srcNodeID, dstNodeID, True)
@@ -93,9 +93,9 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
     features[TRIAD_2] = len(srcInNeighbors & dstInNeighbors)
     features[TRIAD_3] = len(srcInNeighbors & dstOutNeighbors)
 
-    features[TRIAD_0_N] = features[TRIAD_0] * 1.0 / features[NEIGHBORS]
-    features[TRIAD_1_N] = features[TRIAD_1] * 1.0 / features[NEIGHBORS]
-    features[TRIAD_2_N] = features[TRIAD_2] * 1.0 / features[NEIGHBORS]
-    features[TRIAD_3_N] = features[TRIAD_3] * 1.0 / features[NEIGHBORS]
+    features[TRIAD_0_N] = features[TRIAD_0] * 1.0 / (1.0 + features[NEIGHBORS])
+    features[TRIAD_1_N] = features[TRIAD_1] * 1.0 / (1.0 + features[NEIGHBORS])
+    features[TRIAD_2_N] = features[TRIAD_2] * 1.0 / (1.0 + features[NEIGHBORS])
+    features[TRIAD_3_N] = features[TRIAD_3] * 1.0 / (1.0 + features[NEIGHBORS])
 
     return features
