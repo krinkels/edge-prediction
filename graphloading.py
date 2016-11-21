@@ -8,9 +8,54 @@ def loadWikiGraph():
     Loads the Wikipedia vote graph
 
     Returns:
-        A directed graph (snap.TNGraph) of the Wikipedia admin votes
+        A directed graph (snap.TNGraph)
     """
     return snap.LoadEdgeList(snap.PNGraph, "datasets/wiki-Vote.txt", 0, 1, "\t")
+
+def loadAstroPhysics():
+    """
+    Loads the Arxiv Astro Physics collaboration network
+
+    Returns:
+        A directed graph (snap.TNGraph)
+    """
+    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-AstroPh.txt", 0, 1, "\t")
+
+def loadCondensedMatter():
+    """
+    Loads the Arxiv Condensed Matter collaboration network
+
+    Returns:
+        A directed graph (snap.TNGraph)
+    """
+    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-CondMat.txt", 0, 1, "\t")
+
+def loadGeneralRelativity():
+    """
+    Loads the Arxiv General Relativity collaboration network
+
+    Returns:
+        A directed graph (snap.TNGraph)
+    """
+    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-GrQc.txt", 0, 1, "\t")
+
+def loadHEPhysics():
+    """
+    Loads the Arxiv High Energy Physics collaboration network
+
+    Returns:
+        A directed graph (snap.TNGraph)
+    """
+    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-HepPh.txt", 0, 1, "\t")
+
+def loadHEPhysicsTheory():
+    """
+    Loads the Arxiv High Energy Physics Theory  collaboration network
+
+    Returns:
+        A directed graph (snap.TNGraph)
+    """
+    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-HepTh.txt", 0, 1, "\t")
 
 def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     """
