@@ -1,10 +1,12 @@
 import snap
 import random
 import featureextraction
+import numpy as np
 
 def loadWikiGraph():
     """
     Loads the Wikipedia vote graph
+
     Returns:
         A directed graph (snap.TNGraph) of the Wikipedia admin votes
     """
@@ -14,13 +16,17 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     """
     Generates testing and training examples for node pairs from the given graph. Outputs
     results to text file at 'filename' if filename is not None. Each line is formatted as
+
     feature_1 ... feature_n classification
+
     with a newline separating the training examples from the testing examples
+
     Args:
         graph (snap.TNGraph or snap.TUNGraph) : the graph to generate examples from
         testingProportion (float) : the proportion of edges to use in the testing set
         seed (hashable) : a seed for the random number generator
         filename (string) : file location to write results to
+
     Returns:
         A tuple of training and testing examples of the form
         ( [ ([train_features_1], train_class_1),
@@ -38,10 +44,12 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     # First, partition existing edges in training and testing sets
     splitIndex = graph.GetEdges() - int(graph.GetEdges() * testProportion)
 
-    examples = [ (featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId()), 1) for edge in graph.Edges() ]
-    random.shuffle(examples)
-    trainingExamples = examples[:splitIndex]
-    testingExamples = examples[splitIndex:]
+    examplesX = [ featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId()) for edge in graph.Edges() ]
+    examplesY = np.ones(int(graph.GetEdges()))
+
+    random.shuffle(examplesX)
+    trainingExamplesX = examplesX[:splitIndex]
+    testingExamplesX = examplesX[splitIndex:]
 
     # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
     nodeIDs = [ node.GetId() for node in graph.Nodes() ]
@@ -51,9 +59,13 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
         if not graph.IsEdge(pair[0], pair[1]):
             nodePairs.add(pair)
 
-    nonEdgeExamples = [ (featureextraction.extractFeatures(graph, pair[0], pair[1]), 0) for pair in nodePairs ]
-    trainingExamples += nonEdgeExamples[:splitIndex]
-    testingExamples += nonEdgeExamples[splitIndex:]
+    nonEdgeExamplesX = [ featureextraction.extractFeatures(graph, pair[0], pair[1]) for pair in nodePairs ]
+    nonEdgeExamplesY = np.zeros(int(graph.GetEdges()))
+
+    trainingExamplesX += nonEdgeExamplesX[:splitIndex]
+    testingExamplesX  += nonEdgeExamplesX[splitIndex:]
+    trainingExamplesY =  np.concatenate((examplesY[:splitIndex],nonEdgeExamplesY[:splitIndex]), axis = 0)
+    testingExamplesY  =  np.concatenate((examplesY[splitIndex:],nonEdgeExamplesY[splitIndex:]), axis = 0)
 
     # Write the examples to a file if necessary
     if filename is not None:
@@ -69,5 +81,5 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
             f.close()
         except IOError as e:
             print "Error writing to file {0}: {1}".format(filename, e.strerror)
-
-    return (trainingExamples, testingExamples)
+   
+    return (trainingExamplesX,trainingExamplesY, testingExamplesX, testingExamplesY)
