@@ -1,6 +1,7 @@
 import numpy as np
 import logisticRegression
 import neuralNetwork
+import randomForest
 import SVM
 import sys
 
@@ -40,6 +41,10 @@ def edgePrediction(classifier='LR',trainFilename = 'Wiki',testFilenames = ['Astr
         print "Using neural network"
         sys.stdout.flush()
         clf = neuralNetwork.train(trainingExamplesX,trainingExamplesY)
+    elif classifier.lower() == 'rf':
+        print "Using random forests"
+        sys.stdout.flush()
+        clf = randomForest.train(trainingExamplesX,trainingExamplesY)
     else:
         print "Could not understand classifier: "  + classifier
         print "Using logistic regression"
@@ -69,6 +74,6 @@ def edgePrediction(classifier='LR',trainFilename = 'Wiki',testFilenames = ['Astr
         
 #This loops through all possible learners, training data sets, and testing data sets. I ran this and saved the print output for reference
 filenames = ["Wiki","AstroPhysics","CondensedMatter","GeneralRelativity",'HEPhysics','HEPhysicsTheory']
-for reg in ['lr','svm','nn']:
+for reg in ['rf','lr','nn']:
     for fn in filenames:
         edgePrediction(reg,fn,filenames)
