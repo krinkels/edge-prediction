@@ -101,12 +101,39 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     testingExamplesX = examplesX[splitIndex:]
 
     # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
+    # For the purpose of balancing against existing edges, we randomly choose from among pairs of node
+    # which share a neighbor but do not form an edge
+    print "Generating non-edges"
     nodeIDs = [ node.GetId() for node in graph.Nodes() ]
-    nodePairs = set()
+    nodePairs = []
+
+    for srcID in nodeIDs:
+        srcNode = graph.GetNI(srcID)
+        srcOutNeighbors = frozenset([ nodeID for nodeID in srcNode.GetOutEdges() ])
+        srcInNeighbors = frozenset([ nodeID for nodeID in srcNode.GetInEdges() ])
+        srcNeighbors = srcOutNeighbors | srcInNeighbors
+
+        secondDegrees = set()
+        for neighbor in srcNeighbors:
+            neighborNode = graph.GetNI(neighbor)
+            nOutNeighbors = frozenset([ nodeID for nodeID in neighborNode.GetOutEdges() ])
+            nInNeighbors = frozenset([ nodeID for nodeID in neighborNode.GetInEdges() ])
+            nNeighbors = nOutNeighbors | nInNeighbors
+            secondDegrees = secondDegrees | nNeighbors
+        secondDegrees = secondDegrees - set([srcID])
+
+        for dstID in secondDegrees:
+            if not graph.IsEdge(srcID, dstID):
+                nodePairs.append((srcID, dstID))
+
+    nodePairs = random.sample(nodePairs, graph.GetEdges())
+
+    """
     while len(nodePairs) < graph.GetEdges():
         pair = tuple(random.sample(nodeIDs, 2))
         if not graph.IsEdge(pair[0], pair[1]):
             nodePairs.add(pair)
+    """
 
     nonEdgeExamplesX = [ featureextraction.extractFeatures(graph, pair[0], pair[1]) for pair in nodePairs ]
     nonEdgeExamplesY = np.zeros(int(graph.GetEdges()))
