@@ -108,15 +108,16 @@ def generateSlashdotExamples(seed=0, filename=None):
     oldGraph = loadSlashdotOld()
     newGraph = loadSlashdotNew()
 
+    print "Prune new graph nodes"
     oldNodeIDV = snap.TIntV()
     for node in oldGraph.Nodes():
         oldNodeIDV.Add(node.GetId())
     newGraph = snap.GetSubGraph(newGraph, oldNodeIDV)
 
+    print "Generating Adamic/Adar cache table"
     neighborTable = {}
     for node in oldGraph.Nodes():
-        neighbors = set([ nodeID for nodeID in node.GetOutEdges() ]) | set([ nodeID for nodeID in node.GetInEdges()])
-        neighborTable[node.GetId()] = len(neighbors)
+        neighborTable[node.GetId()] = node.GetDeg()
 
     # Get edge examples
     print "Generating edge features"
@@ -238,8 +239,7 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     print "Generating edge features"
     neighborTable = {}
     for node in graph.Nodes():
-        neighbors = set([ nodeID for nodeID in node.GetOutEdges() ]) | set([ nodeID for nodeID in node.GetInEdges()])
-        neighborTable[node.GetId()] = len(neighbors)
+        neighborTable[node.GetId()] = node.GetDeg()
 
     examplesX = [ featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in graph.Edges() ]
     examplesY = [1] * graph.GetEdges()
