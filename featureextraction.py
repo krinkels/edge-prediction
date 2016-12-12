@@ -24,7 +24,7 @@ JACCARD, \
 ADAMIC, \
 PREFERENTIAL = range(NUM_FEATURES)
 
-def extractFeatures(graph, srcNodeID, dstNodeID):
+def extractFeatures(graph, srcNodeID, dstNodeID, neighborTable):
     """
     Extracts a set of features for an edge from srcNodeID to dstNodeID
     in the graph.
@@ -55,6 +55,7 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
         graph (snap.TNGraph or snap.TUNGraph): the graph to extract features from
         srcNodeID (int): the ID of the source of the edge
         dstNodeID (int): the ID for the destination of the edge
+        neighborTable (dict): nodeID to number of neighbors table for faster Adamic/Adar calculation
 
     Returns:
         A list of features extracted from the graph for the specified edge
@@ -109,10 +110,8 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
     features[JACCARD] = len(neighbors) / len(srcNeighbors | dstNeighbors)
     adamicCoeff = 0
     for neighborID in neighbors:
-        neighbor = graph.GetNI(neighborID)
-        nNeighbors = set([ nodeID for nodeID in neighbor.GetOutEdges() ]) | set([ nodeID for nodeID in neighbor.GetInEdges()])
-        if len(nNeighbors) > 1:
-            adamicCoeff += 1.0 / math.log(len(nNeighbors))
+        if neighborTable[neighborID] > 1:
+            adamicCoeff += 1.0 / math.log(neighborTable[neighborID])
     features[ADAMIC] = adamicCoeff
     features[PREFERENTIAL] = len(srcNeighbors) * len(dstNeighbors)
 
