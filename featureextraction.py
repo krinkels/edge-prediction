@@ -92,8 +92,8 @@ def extractFeatures(graph, srcNodeID, dstNodeID, neighborTable):
     dstInNeighbors = frozenset([ nodeID for nodeID in dstNode.GetInEdges() ])
     dstNeighbors = dstOutNeighbors | dstInNeighbors
 
-    neighbors = srcNeighbors & dstNeighbors
-    features[NEIGHBORS] = len(neighbors)
+    commonNeighbors = srcNeighbors & dstNeighbors
+    features[NEIGHBORS] = len(commonNeighbors)
 
     # Calculate the triad participation
     features[TRIAD_0] = len(srcOutNeighbors & dstInNeighbors)
@@ -107,9 +107,10 @@ def extractFeatures(graph, srcNodeID, dstNodeID, neighborTable):
     features[TRIAD_3_N] = features[TRIAD_3] * 1.0 / (1.0 + features[NEIGHBORS])
 
     # Calculate graph distance coefficients
-    features[JACCARD] = len(neighbors) / len(srcNeighbors | dstNeighbors)
+    totalNeighbors = len(srcNeighbors | dstNeighbors)
+    features[JACCARD] = ( features[NEIGHBORS] / totalNeighbors ) if totalNeighbors > 0 else 0
     adamicCoeff = 0
-    for neighborID in neighbors:
+    for neighborID in commonNeighbors:
         if neighborTable[neighborID] > 1:
             adamicCoeff += 1.0 / math.log(neighborTable[neighborID])
     features[ADAMIC] = adamicCoeff

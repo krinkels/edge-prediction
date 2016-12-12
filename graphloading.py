@@ -101,40 +101,36 @@ def pruneGraph(graph, minDegree):
             nIdV.Add(node.GetId())
     return snap.GetSubGraph(graph, nIdV)
 
-def generateSlashdotExamples(seed=0, filename=None):
-  
-    # Load in the graphs. For the new graph, we only care about nodes which exist
-    # in the old graph, so generate the subgraph first
-    oldGraph = loadSlashdotOld()
-    newGraph = loadSlashdotNew()
+def generateExampleSplit(oldGraph, newGraph, testProportion=0.3, seed=None, filename=None):
+    if seed is not None:
+        random.seed(seed)
 
-    print "Prune new graph nodes"
+    # For the new graph, we only care about nodes which exist
+    # in the old graph, so generate the subgraph first
+    print "Pruning new graph nodes"
     oldNodeIDV = snap.TIntV()
     for node in oldGraph.Nodes():
         oldNodeIDV.Add(node.GetId())
     newGraph = snap.GetSubGraph(newGraph, oldNodeIDV)
+    print "Old graph has {} nodes and {} edges".format(oldGraph.GetNodes(), oldGraph.GetEdges())
+    print "New graph has {} nodes and {} edges".format(newGraph.GetNodes(), newGraph.GetEdges())
 
     print "Generating Adamic/Adar cache table"
     neighborTable = {}
     for node in oldGraph.Nodes():
         neighborTable[node.GetId()] = node.GetDeg()
 
-    # Get edge examples
     print "Generating edge features"
-    trainingExamplesX = [ featureextraction.extractFeatures(oldGraph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in oldGraph.Edges() ]
-    trainingExamplesY = [1] * len(trainingExamplesX)
+    # Generate edge features for edges which appear in the new graph but do not appear in the old graph
+    edgeFeatures = [ featureextraction.extractFeatures(oldGraph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in newGraph.Edges()
+                     if not oldGraph.IsEdge(edge.GetSrcNId(), edge.GetDstNId()) ]
+    random.shuffle(edgeFeatures)
+    print "Generated features for {} edges".format(len(edgeFeatures))
 
-    testingExamplesX = [ featureextraction.extractFeatures(oldGraph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in newGraph.Edges()
-                         if not oldGraph.IsEdge(edge.GetSrcNId(), edge.GetDstNId()) ]
-    testingExamplesY = [1] * len(testingExamplesX)
-
-    # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
-    # For the training set, we randomly sample pairs of nodes which do not form an edge in the old graph.
-    # For the testing set, we randomly sample pairs of nodes which do not form an edge in the new graph.
     print "Generating non-edge samples"
+    # Generate pairs of nodes which share a neighbor but do not form an edge in the new graph or the old graph
     nodeIDs = [ node.GetId() for node in oldGraph.Nodes() ]
-    trainingNodePairs = []
-    testingNodePairs = []
+    nodePairs = []
 
     for srcID in nodeIDs:
         srcNode = oldGraph.GetNI(srcID)
@@ -147,24 +143,35 @@ def generateSlashdotExamples(seed=0, filename=None):
             neighborNode = oldGraph.GetNI(neighbor)
             nOutNeighbors = frozenset([ nodeID for nodeID in neighborNode.GetOutEdges() ])
             nInNeighbors = frozenset([ nodeID for nodeID in neighborNode.GetInEdges() ])
-            nNeighbors = nOutNeighbors | nInNeighbors
-            secondDegrees = secondDegrees | nNeighbors
+            secondDegrees = secondDegrees | nOutNeighbors | nInNeighbors
         secondDegrees = secondDegrees - set([srcID])
 
         for dstID in secondDegrees:
-            if not oldGraph.IsEdge(srcID, dstID):
-                trainingNodePairs.append((srcID, dstID))
-            if not newGraph.IsEdge(srcID, dstID):
-                testingNodePairs.append((srcID, dstID))
+            if not oldGraph.IsEdge(srcID, dstID) and not newGraph.IsEdge(srcID, dstID):
+                nodePairs.append((srcID, dstID))
+    print "Generated {} non-edge pairs".format(len(nodePairs))
 
-    trainingNodePairs = random.sample(trainingNodePairs, min(10 * len(trainingExamplesX), len(trainingNodePairs)))
-    testingNodePairs = random.sample(testingNodePairs, min(10 * len(testingExamplesX), len(testingNodePairs)))
-
+    nodePairs = random.sample(nodePairs, min(9 * len(edgeFeatures), len(nodePairs)))
+    print "Sampled {} non-edge pairs".format(len(nodePairs))
+    
     print "Generating non-edge features"
-    trainingExamplesX += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in trainingNodePairs ]
-    testingExamplesX  += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in testingNodePairs ]
-    trainingExamplesY += [0] * len(trainingNodePairs)
-    testingExamplesY  += [0] * len(testingNodePairs)
+    nonEdgeFeatures = [ featureextraction.extractFeatures(oldGraph, srcNode, dstNode, neighborTable) for srcNode, dstNode in nodePairs ]
+    print "Generated features for {} non-edges".format(len(nonEdgeFeatures))
+
+    edgeSplitIndex = int(len(edgeFeatures) * testProportion)
+    nonEdgeSplitIndex = int(len(nonEdgeFeatures) * testProportion)
+
+    testingEdgeFeatures = edgeFeatures[:edgeSplitIndex]
+    testingNonEdgeFeatures = nonEdgeFeatures[:nonEdgeSplitIndex]
+    trainingEdgeFeatures = edgeFeatures[edgeSplitIndex:]
+    trainingNonEdgeFeatures = nonEdgeFeatures[nonEdgeSplitIndex:]
+
+    testingExamplesX = testingEdgeFeatures + testingNonEdgeFeatures
+    testingExamplesY = [1] * len(testingEdgeFeatures) + [0] * len(testingNonEdgeFeatures)
+    trainingExamplesX = trainingEdgeFeatures + trainingNonEdgeFeatures
+    trainingExamplesY = [1] * len(trainingEdgeFeatures) + [0] * len(trainingNonEdgeFeatures)
+    
+    print "Generate {} training examples and {} testing examples".format(len(trainingExamplesX), len(testingExamplesX))
 
     #Instead of empty space between training and testing sets, write -1's.
     #This is used as a flag to easily find separation between data sets
@@ -203,6 +210,32 @@ def generateSlashdotExamples(seed=0, filename=None):
         
     return (trainingExamplesX,trainingExamplesY, testingExamplesX, testingExamplesY)
 
+def generateSlashdotExamples(testProportion=0.3, seed=None, filename=None):
+  
+    # Load in the graphs. For the new graph, we only care about nodes which exist
+    # in the old graph, so generate the subgraph first
+    oldGraph = loadSlashdotOld()
+    newGraph = loadSlashdotNew()
+
+    return generateExampleSplit(oldGraph, newGraph, testProportion, seed, filename)
+
+def generateArtificialExamples(graph, newProportion=0.05, testProportion=0.3, seed=None, filename=None):
+
+    # SNAP doesn't come with a graph copy method, so just induce an subgraph on the same set of nodes
+    nodeIDVec = snap.TIntV()
+    for node in graph.Nodes():
+        nodeIDVec.Add(node.GetId())
+    oldGraph = snap.GetSubGraph(graph, nodeIDVec)
+
+    # Sample newProportion of edges and remove them the graph to artificially generate old graph
+    sampleSize = int(graph.GetEdges() * newProportion)
+    print "Sampling {} new edges out of {} total edges".format(sampleSize, graph.GetEdges())
+    newEdges = random.sample([ (edge.GetSrcNId(), edge.GetDstNId()) for edge in graph.Edges() ], sampleSize)
+
+    for srcNID, dstNID in newEdges:
+        oldGraph.DelEdge(srcNID, dstNID)
+
+    return generateExampleSplit(oldGraph, graph, testProportion, seed, filename)
 
 def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
     """
@@ -350,7 +383,7 @@ def generateFeatureFiles(filenames=None):
             print "Generating feature files for: " + fn
             sys.stdout.flush()
             exec('graph = load' + fn + '()')
-            generateExamples(graph,filename = 'featureFiles/' + fn)
+            generateArtificialExamples(graph,filename = 'featureFiles/' + fn)
             sys.stdout.flush()
     
         else:
