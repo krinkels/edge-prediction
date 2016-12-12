@@ -134,8 +134,8 @@ def generateSlashdotExamples(seed=0, filename=None):
             if not newGraph.IsEdge(srcID, dstID):
                 testingNodePairs.append((srcID, dstID))
 
-    trainingNodePairs = random.sample(trainingNodePairs, len(trainingExamplesX))
-    testingNodePairs = random.sample(testingNodePairs, len(testingExamplesX))
+    trainingNodePairs = random.sample(trainingNodePairs, 10 * len(trainingExamplesX))
+    testingNodePairs = random.sample(testingNodePairs, 10 * len(testingExamplesX))
 
     print "Generating non-edge features"
     trainingExamplesX += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in trainingNodePairs ]
@@ -220,11 +220,13 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
         neighborTable[node.GetId()] = len(neighbors)
 
     examplesX = [ featureextraction.extractFeatures(graph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in graph.Edges() ]
-    examplesY = np.ones(int(graph.GetEdges()))
+    examplesY = [1] * graph.GetEdges()
 
     random.shuffle(examplesX)
     trainingExamplesX = examplesX[:splitIndex]
+    trainingExamplesY = examplesY[:splitIndex]
     testingExamplesX = examplesX[splitIndex:]
+    testingExamplesY = examplesY[splitIndex:]
 
     # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
     # For the purpose of balancing against existing edges, we randomly choose from among pairs of node
@@ -252,7 +254,8 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
             if not graph.IsEdge(srcID, dstID):
                 nodePairs.append((srcID, dstID))
 
-    nodePairs = random.sample(nodePairs, graph.GetEdges())
+    print "Total node pairs: ", len(nodePairs)
+    nodePairs = random.sample(nodePairs, 10 * graph.GetEdges())
 
     """
     while len(nodePairs) < graph.GetEdges():
@@ -263,12 +266,13 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
 
     print "Generating non-edge features"
     nonEdgeExamplesX = [ featureextraction.extractFeatures(graph, pair[0], pair[1], neighborTable) for pair in nodePairs ]
-    nonEdgeExamplesY = np.zeros(int(graph.GetEdges()))
+    nonEdgeExamplesY = [0] * (10 * graph.GetEdges())
+    splitIndex *= 10
 
     trainingExamplesX += nonEdgeExamplesX[:splitIndex]
+    trainingExamplesY += nonEdgeExamplesY[:splitIndex]
     testingExamplesX  += nonEdgeExamplesX[splitIndex:]
-    trainingExamplesY =  np.concatenate((examplesY[:splitIndex],nonEdgeExamplesY[:splitIndex]), axis = 0)
-    testingExamplesY  =  np.concatenate((examplesY[splitIndex:],nonEdgeExamplesY[splitIndex:]), axis = 0)
+    testingExamplesY  += nonEdgeExamplesY[splitIndex:]
 
     #Instead of empty space between training and testing sets, write -1's.
     #This is used as a flag to easily find separation between data sets
