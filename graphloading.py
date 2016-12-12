@@ -92,11 +92,12 @@ def generateSlashdotExamples(seed=0, filename=None):
     newGraph = snap.GetSubGraph(newGraph, oldNodeIDV)
 
     neighborTable = {}
-    for node in graph.Nodes():
+    for node in oldGraph.Nodes():
         neighbors = set([ nodeID for nodeID in node.GetOutEdges() ]) | set([ nodeID for nodeID in node.GetInEdges()])
         neighborTable[node.GetId()] = len(neighbors)
 
     # Get edge examples
+    print "Generating edge features"
     trainingExamplesX = [ featureextraction.extractFeatures(oldGraph, edge.GetSrcNId(), edge.GetDstNId(), neighborTable) for edge in oldGraph.Edges() ]
     trainingExamplesY = [1] * len(trainingExamplesX)
 
@@ -107,6 +108,7 @@ def generateSlashdotExamples(seed=0, filename=None):
     # Next, generate pairs of nodes which are not edges to balance out the training and testing sets
     # For the training set, we randomly sample pairs of nodes which do not form an edge in the old graph.
     # For the testing set, we randomly sample pairs of nodes which do not form an edge in the new graph.
+    print "Generating non-edge samples"
     nodeIDs = [ node.GetId() for node in oldGraph.Nodes() ]
     trainingNodePairs = []
     testingNodePairs = []
@@ -135,10 +137,11 @@ def generateSlashdotExamples(seed=0, filename=None):
     trainingNodePairs = random.sample(trainingNodePairs, len(trainingExamplesX))
     testingNodePairs = random.sample(testingNodePairs, len(testingExamplesX))
 
+    print "Generating non-edge features"
     trainingExamplesX += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in trainingNodePairs ]
     testingExamplesX  += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in testingNodePairs ]
     trainingExamplesY += [0] * len(trainingNodePairs)
-    testingExamplesY  =  [0] * len(testingNodePairs)
+    testingExamplesY  += [0] * len(testingNodePairs)
 
     #Instead of empty space between training and testing sets, write -1's.
     #This is used as a flag to easily find separation between data sets
