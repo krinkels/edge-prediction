@@ -110,8 +110,9 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
     adamicCoeff = 0
     for neighborID in neighbors:
         neighbor = graph.GetNI(neighborID)
-        nNeighbors = set([ nodeID for nodeID in srcNode.GetOutEdges() ]) | set([ nodeID for nodeID in srcNode.GetInEdges()])
-        adamicCoeff += 1.0 / math.log(len(nNeighbors))
+        nNeighbors = set([ nodeID for nodeID in neighbor.GetOutEdges() ]) | set([ nodeID for nodeID in neighbor.GetInEdges()])
+        if len(nNeighbors) > 1:
+            adamicCoeff += 1.0 / math.log(len(nNeighbors))
     features[ADAMIC] = adamicCoeff
     features[PREFERENTIAL] = len(srcNeighbors) * len(dstNeighbors)
 
