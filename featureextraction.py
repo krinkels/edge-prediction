@@ -1,7 +1,8 @@
 import snap
 import sys
+import math
 
-NUM_FEATURES = 17
+NUM_FEATURES = 20
 SRC_D_IN, \
 SRC_D_OUT, \
 SRC_IN_OUT, \
@@ -18,7 +19,10 @@ TRIAD_3, \
 TRIAD_0_N, \
 TRIAD_1_N, \
 TRIAD_2_N, \
-TRIAD_3_N = range(NUM_FEATURES)
+TRIAD_3_N, \
+JACCARD, \
+ADAMIC, \
+PREFERENTIAL = range(NUM_FEATURES)
 
 def extractFeatures(graph, srcNodeID, dstNodeID):
     """
@@ -43,6 +47,9 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
         TRIAD_1_N : TRIAD_1 / NEIGHBORS ratio
         TRIAD_2_N : TRIAD_2 / NEIGHBORS ratio
         TRIAD_3_N : TRIAD_3 / NEIGHBORS ratio
+        JACCARD : Jaccard's coefficient (common neighbors / all neighbors)
+        ADAMIC : Adamic/Adar coefficient
+        PREFERENTIAL : preferential attachment coefficient (neighbors(src) * neighbors(dst))
 
     Args:
         graph (snap.TNGraph or snap.TUNGraph): the graph to extract features from
@@ -97,5 +104,15 @@ def extractFeatures(graph, srcNodeID, dstNodeID):
     features[TRIAD_1_N] = features[TRIAD_1] * 1.0 / (1.0 + features[NEIGHBORS])
     features[TRIAD_2_N] = features[TRIAD_2] * 1.0 / (1.0 + features[NEIGHBORS])
     features[TRIAD_3_N] = features[TRIAD_3] * 1.0 / (1.0 + features[NEIGHBORS])
+
+    # Calculate graph distance coefficients
+    features[JACCARD] = len(neighbors) / len(srcNeighbors | dstNeighbors)
+    adamicCoeff = 0
+    for neighborID in neighbors:
+        neighbor = graph.GetNI(neighborID)
+        nNeighbors = set([ nodeID for nodeID in srcNode.GetOutEdges() ]) | set([ nodeID for nodeID in srcNode.GetInEdges()])
+        adamicCoeff += 1.0 / math.log(len(nNeighbors))
+    features[ADAMIC] = adamicCoeff
+    features[PREFERENTIAL] = len(srcNeighbors) * len(dstNeighbors)
 
     return features
