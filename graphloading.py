@@ -14,52 +14,58 @@ def loadWiki():
     Returns:
         A directed graph (snap.TNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/wiki-Vote.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PNGraph, "datasets/wiki-Vote.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadAstroPhysics():
     """
     Loads the Arxiv Astro Physics collaboration network
 
     Returns:
-        A directed graph (snap.TNGraph)
+        A undirected graph (snap.TUNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-AstroPh.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PUNGraph, "datasets/ca-AstroPh.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadCondensedMatter():
     """
     Loads the Arxiv Condensed Matter collaboration network
 
     Returns:
-        A directed graph (snap.TNGraph)
+        A undirected graph (snap.TUNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-CondMat.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PUNGraph, "datasets/ca-CondMat.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadGeneralRelativity():
     """
     Loads the Arxiv General Relativity collaboration network
 
     Returns:
-        A directed graph (snap.TNGraph)
+        A undirected graph (snap.TUNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-GrQc.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PUNGraph, "datasets/ca-GrQc.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadHEPhysics():
     """
     Loads the Arxiv High Energy Physics collaboration network
 
     Returns:
-        A directed graph (snap.TNGraph)
+        A undirected graph (snap.TUNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-HepPh.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PUNGraph, "datasets/ca-HepPh.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadHEPhysicsTheory():
     """
     Loads the Arxiv High Energy Physics Theory  collaboration network
 
     Returns:
-        A directed graph (snap.TNGraph)
+        A undirected graph (snap.TUNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/ca-HepTh.txt", 0, 1, "\t")
+    graph = snap.LoadEdgeList(snap.PUNGraph, "datasets/ca-HepTh.txt", 0, 1, "\t")
+    return pruneGraph(graph, 3)
 
 def loadSlashdotOld():
     """
@@ -68,7 +74,8 @@ def loadSlashdotOld():
     Returns:
         A directed graph (snap.TNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/soc-Slashdot0811.txt")
+    graph = snap.LoadEdgeList(snap.PNGraph, "datasets/soc-Slashdot0811.txt")
+    return pruneGraph(graph, 5) 
 
 def loadSlashdotNew():
     """
@@ -77,7 +84,22 @@ def loadSlashdotNew():
     Returns:
         A directed graph (snap.TNGraph)
     """
-    return snap.LoadEdgeList(snap.PNGraph, "datasets/soc-Slashdot0902.txt")
+    graph = snap.LoadEdgeList(snap.PNGraph, "datasets/soc-Slashdot0902.txt")
+    return pruneGraph(graph, 5)
+
+def pruneGraph(graph, minDegree):
+    """
+    Prunes a graph to remove nodes with degree less than minDegree
+
+    Returns:
+        A subgraph of graph
+    """
+
+    nIdV = snap.TIntV()
+    for node in graph.Nodes():
+        if node.GetDeg() > minDegree:
+            nIdV.Add(node.GetId())
+    return snap.GetSubGraph(graph, nIdV)
 
 def generateSlashdotExamples(seed=0, filename=None):
   
@@ -134,8 +156,8 @@ def generateSlashdotExamples(seed=0, filename=None):
             if not newGraph.IsEdge(srcID, dstID):
                 testingNodePairs.append((srcID, dstID))
 
-    trainingNodePairs = random.sample(trainingNodePairs, min(10 * len(trainingExamplesX), len(trainingNodePairs))
-    testingNodePairs = random.sample(testingNodePairs, min(10 * len(testingExamplesX), len(testingNodePairs))
+    trainingNodePairs = random.sample(trainingNodePairs, min(10 * len(trainingExamplesX), len(trainingNodePairs)))
+    testingNodePairs = random.sample(testingNodePairs, min(10 * len(testingExamplesX), len(testingNodePairs)))
 
     print "Generating non-edge features"
     trainingExamplesX += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in trainingNodePairs ]
@@ -256,7 +278,7 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
 
     print "Total node pairs: ", len(nodePairs)
 
-    nodePairs = random.sample(nodePairs, min(10 * graph.GetEdges(), len(nodePairs))
+    nodePairs = random.sample(nodePairs, min(10 * graph.GetEdges(), len(nodePairs)))
 
     """
     while len(nodePairs) < graph.GetEdges():
