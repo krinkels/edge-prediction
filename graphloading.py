@@ -134,8 +134,8 @@ def generateSlashdotExamples(seed=0, filename=None):
             if not newGraph.IsEdge(srcID, dstID):
                 testingNodePairs.append((srcID, dstID))
 
-    trainingNodePairs = random.sample(trainingNodePairs, 10 * len(trainingExamplesX))
-    testingNodePairs = random.sample(testingNodePairs, 10 * len(testingExamplesX))
+    trainingNodePairs = random.sample(trainingNodePairs, min(10 * len(trainingExamplesX), len(trainingNodePairs))
+    testingNodePairs = random.sample(testingNodePairs, min(10 * len(testingExamplesX), len(testingNodePairs))
 
     print "Generating non-edge features"
     trainingExamplesX += [ featureextraction.extractFeatures(oldGraph, pair[0], pair[1], neighborTable) for pair in trainingNodePairs ]
@@ -255,7 +255,8 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
                 nodePairs.append((srcID, dstID))
 
     print "Total node pairs: ", len(nodePairs)
-    nodePairs = random.sample(nodePairs, 10 * graph.GetEdges())
+
+    nodePairs = random.sample(nodePairs, min(10 * graph.GetEdges(), len(nodePairs))
 
     """
     while len(nodePairs) < graph.GetEdges():
@@ -266,8 +267,8 @@ def generateExamples(graph, testProportion=0.1, seed=0, filename=None):
 
     print "Generating non-edge features"
     nonEdgeExamplesX = [ featureextraction.extractFeatures(graph, pair[0], pair[1], neighborTable) for pair in nodePairs ]
-    nonEdgeExamplesY = [0] * (10 * graph.GetEdges())
-    splitIndex *= 10
+    nonEdgeExamplesY = [0] * len(nonEdgeExamplesX)
+    splitIndex = len(nonEdgeExamplesX) - int(len(nonEdgeExamplesX) * testProportion)
 
     trainingExamplesX += nonEdgeExamplesX[:splitIndex]
     trainingExamplesY += nonEdgeExamplesY[:splitIndex]
