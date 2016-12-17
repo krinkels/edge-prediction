@@ -1,0 +1,41 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width  = 0.98*\textwidth,
+	height = 3.6cm,
+	major x tick style = transparent,
+	ybar=2*\pgflinewidth,
+	bar width=6pt,
+	ymajorgrids = true,
+	ylabel = {Percent Accuracy},
+	%xlabel = {Data Set Used in Training},
+	symbolic x coords={Wiki,AP,CM,GR, HEP, HEPT,SD08,SD09},
+	xtick = data,
+	ytick = {0,20,40,60,80,100},
+	title = {Neural Network},
+	scaled y ticks = false,
+	enlarge x limits=0.15,
+	ymin=0,
+	ymax=100,
+	%legend cell align=left,
+	legend style={draw=none,legend columns=4,column sep=1ex,at={(0.88,-0.6)},anchor=south east,legend cell align=left,align=left,fill=white,font=\footnotesize}
+	%legend style={
+	%	at={(1.02,0)},
+%		anchor=south west,
+%		column sep=1ex
+%	}
+]
+	\addplot[style={bblue,fill=bblue,mark=none}]
+	coordinates {(Wiki, 46.77) (AP,20.61) (CM,21.76) (GR,38.93) (HEP,45.31) (HEPT, 24.71) (SD08, 35.41) (SD09, 35.30)};
+	
+	\addplot[style={rred,fill=rred,mark=none}]
+	coordinates {(Wiki, 62.60) (AP,80.30) (CM,75.02) (GR,75.17) (HEP,86.03) (HEPT, 64.09) (SD08, 83.51) (SD09, 84.84)};
+	
+	\addplot[style={ggreen,fill=ggreen,mark=none}]
+	coordinates {(Wiki, 20.55) (AP,80.44) (CM,77.39) (GR,73.15) (HEP,83.00) (HEPT, 63.32) (SD08, 66.93) (SD09, 78.53)};
+	
+	\addplot[style={ppurple,fill=ppurple,mark=none}]
+	coordinates {(Wiki, 44.9) (AP,77.66) (CM,76.120) (GR,71.140) (HEP,74.95) (HEPT, 52.900) (SD08, 56.3) (SD09, 55.4)};
+	
+	\legend{Basic Features, Basic and Triad, All Features, Adamic Heuristic}
+\end{axis}
+\end{tikzpicture}

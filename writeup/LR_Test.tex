@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+\begin{axis}[
+width  = 0.98*\textwidth,
+height = 3.6cm,
+major x tick style = transparent,
+ybar=2*\pgflinewidth,
+bar width=6pt,
+ymajorgrids = true,
+ylabel = {Percent Accuracy},
+%xlabel = {Data Set Used in Training},
+symbolic x coords={Wiki,AP,CM,GR, HEP, HEPT,SD08,SD09},
+xtick = data,
+ytick = {0,20,40,60,80,100},
+title = {Logistic Regression},
+scaled y ticks = false,
+enlarge x limits=0.15,
+ymin=0,
+ymax=100,
+legend cell align=left,
+legend style={
+	at={(1.02,0)},
+	anchor=south west,
+	column sep=1ex
+}
+]
+\addplot[style={bblue,fill=bblue,mark=none}]
+coordinates {(Wiki, 44.47) (AP,15.31) (CM,20.58) (GR,20.13) (HEP,33.88) (HEPT, 23.17) (SD08, 25.79) (SD09, 26.00)};
+
+\addplot[style={rred,fill=rred,mark=none}]
+coordinates {(Wiki, 59.23) (AP,78.72) (CM,71.38) (GR,69.80) (HEP,82.88) (HEPT, 61.78) (SD08, 71.13) (SD09, 69.25)};
+
+\addplot[style={ggreen,fill=ggreen,mark=none}]
+coordinates {(Wiki, 51.55) (AP,74.61) (CM,80.44) (GR,73.83) (HEP,81.43) (HEPT, 65.25) (SD08, 69.40) (SD09, 68.18)};
+
+\addplot[style={ppurple,fill=ppurple,mark=none}]
+coordinates {(Wiki, 44.9) (AP,77.66) (CM,76.120) (GR,71.140) (HEP,74.95) (HEPT, 52.900) (SD08, 56.3) (SD09, 55.4)};
+
+%legend{Basic Features, Basic and Triad, All Features, Adamic Heuristic}
+\end{axis}
+\end{tikzpicture}
