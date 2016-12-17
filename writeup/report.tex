@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\usepackage{tikz}
+
+% Define bar chart colors
+%
+\definecolor{bblue}{HTML}{4F81BD}
+\definecolor{rred}{HTML}{C0504D}
+\definecolor{ggreen}{HTML}{9BBB59}
+\definecolor{ppurple}{HTML}{9F4C7C}
+\definecolor{oorange}{HTML}{FFA500}
+\definecolor{yyellow}{HTML}{44DDDD}
+
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{0.4\baselineskip}{0.2\baselineskip}
+
+% MARGINS (DO NOT EDIT) ---------------------------------------------
+\oddsidemargin  0in \evensidemargin 0in \topmargin -0.5in
+\headheight 0in \headsep 0.1in
+\textwidth  6.5in \textheight 9.8in
+\parskip 1.25ex  \parindent 0ex \footskip 20pt
+% ---------------------------------------------------------------------------------
+
+\title{Application of Machine Learning to Link Prediction}
+\author{Kyle Julian (kjulian3), Wayne Lu (waynelu)}
+\date{December 16, 2016}
+\begin{document}
+\maketitle
+   
+\section{Introduction (0.5 pages)}
+Real-world networks evolve over time as new nodes and links are added. Link prediction algorithms use historical data in order to predict the appearance of a new links in the network or to identify links which may exist but are not represented in the data. The application of link prediction is most commonly seen in recommendation engines, such for new connections on social networks or related products on shopping sites. Traditional approaches involve the calculation of a heuristic similarity score for a pair of nodes, such as the number of common neighbors or the shortest path length connecting the nodes, where pairs of nodes with the highest similarity scores are considered the most likely edges.
+
+In this project, we will apply supervised learning algorithms to the link prediction prediction problem using a large set of topological features. Given a network at two different points in time, we train a learning algorithm to identify pairs of edges which appear in the newer network but not in the older network. Then, for a pair of nodes, we use the classification probability of the learning algorithm as our link prediction heuristic. Furthermore, we show that our network-specific heuristics outperform generic heuristics such as the Adamic/Adar coefficient and the Jaccard coefficient.
+
+\section{Related Work (0.5 pages)}
+Link prediction and the application of machine learning techniques to link prediction both have significant corpuses of work behind them. Adamic and Adar used similarities between the web pages of students at MIT and Stanford to predict friendship. Notably, in generating a similarity score, common features between students were weighted by the inverse log of their overall frequency [1]. Liben-Nowell and Kleinberg applied to idea of link predictors to network evolution by evaluating how well link prediction heuristics can account for the growth of a network over time. They used a variety of topological heuristic scores as link predictors for arXiv co-authorship networks and compared their relative performances [2]. In the same vein, Zhou et al. evaluated the performance of local similarity heuristics on six real-world networks from different domains and then describe a new local similarity measure based on resource distribution through common neighbors [3].
+
+Al Hasan et al. applied supervised learning to link prediction on the BIOBASE and DBPL co-authorship networks, using both topological and domain-specific proximity features [4]. Leskovec et al. applied supervised learning to edge sign detection in real-world social networks, notably comparing the performance of trained algorithms across different datasets and applying partial triads as features to capture the relationship of two nodes through their neighbors [5].
+
+\section{Datasets and Features (0.5 - 1 page)}
+The datasets used in this project are publicly available from the Stanford Network Analysis Project (SNAP) [6]. Our datasets consist of the Wikipedia Request for Adminship (RfA) voting network, five arXiv co-authorship networks, and two snapshots of the Slashdot Zoo social network. For each dataset graph $G = (V, E)$, examples were generating via the following process:
+\begin{enumerate}[1.]
+\item Remove low-degree nodes from $G$ ($d_{\min} = 5$ for Slashdot graphs, $d_{\min} = 3$ for all others) to induce a subgraph $G_{n} = (V', E')$
+\item Let $E''$ be a random sample of 10\% of the edges of $E'$. Let $G_{o} = (V', E' - E'')$
+\item Let $P \subset V' \times V'$ be all pairs of nodes $(u, v)$ such that $u$ and $v$ share a common neighbor, but $(u, v) \not \in E'$ and $u \neq v$
+\item Apply a 70-30 training-testing split to $E''$ and $P$ and extract the topological features using $G_{o}$.
+\end{enumerate}
+
+\begin{table}[h]
+	\centering
+   		\begin{tabular}{l|r|r|r|r}
+                	\textbf{Dataset} & \textbf{Nodes} & \textbf{Edges} & \textbf{Training} & \textbf{Testing} \\ \hline
+                	wiki-Vote & 3772 & 98978 & 28491 & 66479 \\ \hline
+                	ca-AstroPh & 14175 & 189929 & 56976 & 132944\\ \hline
+                	ca-CondMat & 14645 & 78785 & 23634 & 55146 \\ \hline
+                	ca-GrQc & 2155 & 9967 & 2988 & 6972 \\ \hline
+                	ca-HepPh & 7225 & 110243 & 33072 & 77168 \\ \hline
+                	ca-HepTh & 4306 & 17306 & 5190 & 12110 \\ \hline
+		slashdot0811 & 77360 & 905468 & 271638 & 633822 \\ \hline
+		slashdot0902 & 82168 & 948464 & 284538 & 663922 \\
+                	\end{tabular}
+	\caption{Summary statistics of the pruned datasets}
+\end{table}
+
+The removal of a random sample of edges simulates the state of the graph at a previous point in time, $G_{o}$. Our positive training examples then consist of edges which do not appear in $G_o$ but do appear in $G_n$, simulating the growth of the network. We balance our positive examples with negative examples which consist of pairs of nodes which do not form an edge in $G_n$. We then extract features from $G_o$ because our goal to train a learner to predict edges in $G_n$ using the current state of $G_o$.
+
+For a pair of nodes $(u, v)$, we extract the three different classes of features. There are eight degree features which are $d_{\text{in}}(u)$, $d_{\text{out}}(u)$, $d_{\text{out}}(u) / d_{\text{out}}(u)$, $d_{\text{out}}(u) / d_{\text{in}}(u)$, $d_{\text{in}}(v)$, $d_{\text{out}}(v)$, $d_{\text{out}}(v) / d_{\text{out}}(v)$, and $d_{\text{out}}(v) / d_{\text{in}}(v)$. There are eight triad features which are defined by the number of partial triads that $u, v$ form with a common neighbor $w$. There are four types of triads with participation frequency for each denoted as $t_1$, $t_2$, $t_3$, and $t_4$. The eight triad features are: $t_1$, $t_2$, $t_3$, $t_4$, $t_1 / C(u, v)$, $t_2 / C(u, v)$, $t_3 /  C(u, v)$, and $t_4 / C(u, v)$, where $C(u, v)$ is the total number of common neighbors. Finally, there are four heuristic features: common neighbors ($\Gamma(u) \cap \Gamma(v)$), the Adamic/Adar coefficient ($\sum_{w \in \Gamma(u) \cap \Gamma(v)} \frac{1}{\log |\Gamma(w)|}$), the Jaccard coefficient ($\frac{|\Gamma(u) \cap \Gamma(v)|}{|\Gamma(u) \cup \Gamma(v)|}$), and the preferential attachment coefficient ($|\Gamma(u)| \cdot |\Gamma(v)|$).
+
+\begin{table}[h]
+        \centering
+            \begin{tabular}{c|c|c|c}
+            $u \rightarrow w \rightarrow v$ & $u \rightarrow w \leftarrow v$ & $u \leftarrow w \rightarrow v$ & $u \leftarrow w \leftarrow v$ \\
+            $t_1$ & $t_2$ & $t_3$ & $t_4$
+            \end{tabular}
+          \caption{The four triad types that $u$ and $v$ can form with a common neighbor $w$}
+\end{table}
+
+\section{Methods (1 - 1.5 pages)}
+
+\section{Results and Discussion (1-3 pages)}
+
+\section{Conclusion and Future Work (1-3 paragraphs)}
+Through supervised learning, we are able to train learning algorithms to calculate network-specific similarity scores which outperform traditional similarity heuristics. Notably, the use of only degree and triad features is enough to have higher accuracy than our baseline of the Adamic/Adar coefficient. Because our features depend on the topological structure of the network and do not use domain-specific features, it is possible to investigate similarities between network structures by cross-evaluating the performance of the learning algorithms.
+
+It should be noted that our work roughly simulated network growth by randomly removing edges. Unfortunately, organic real-world network growth is not random but tends to follow a preferential attachment model. Therefore, to truly draw any conclusions, our methods should be used on real network growth data by capturing a network at two distinct times. Further evaluation of the generalizability of our methods across different domains is also warranted. In our results, we were able to show that networks drawn from different domains exhibited different network structures which degraded the performance of link predictors. However, we did not have the time to collect and process additional datasets to find networks from different domains which showed similar cross-performance.
+
+\section{References}
+\begin{enumerate}[1.]
+\item Adamic, Lada A., and Eytan Adar. "Friends and neighbors on the web." \textit{Social networks} 25.3 (2003): 211-230.
+\item Liben-Nowell, David, and Jon Kleinberg. "The link-prediction problem for social networks." \textit{Journal of the American society for information science and technology} 58.7 (2007): 1019-1031.
+\item Zhou, Tao, Linyuan Lü, and Yi-Cheng Zhang. "Predicting missing links via local information." \textit{The European Physical Journal} B 71.4 (2009): 623-630.
+\item Al Hasan, Mohammad, et al. "Link prediction using supervised learning." \textit{SDM06: workshop on link analysis, counter-terrorism and security}. 2006.
+\item Leskovec, Jure, Daniel Huttenlocher, and Jon Kleinberg. "Predicting positive and negative links in online social networks." \textit{Proceedings of the 19th international conference on World wide web. ACM}, 2010.
+\item Leskovec, Jure and Andrej Krevl. "SNAP Datasets: Stanford Large Network Dataset Collection." http://snap.stanford.edu/data. Accessed December 2016.
+\end{enumerate}
+
+\end{document}
