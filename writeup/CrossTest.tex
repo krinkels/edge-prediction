@@ -1,10 +1,14 @@
+\definecolor{yyyellow}{HTML}{DDDD44}
+\definecolor{bblack}{HTML}{000000}
+\definecolor{ccyan}{HTML}{44DDDD}
+
 \begin{tikzpicture}
 \begin{axis}[
 	width  = 0.98*\textwidth,
 	height = 3.6cm,
 	major x tick style = transparent,
 	ybar=2*\pgflinewidth,
-	bar width=6pt,
+	bar width=4pt,
 	ymajorgrids = true,
 	ylabel = {Percent Accuracy},
 	%xlabel = {Data Set Used in Training},
@@ -17,7 +21,7 @@
 	ymin=0,
 	ymax=100,
 	%legend cell align=left,
-	legend style={draw=none,legend columns=4,column sep=1ex,at={(0.88,-0.6)},anchor=south east,legend cell align=left,align=left,fill=white,font=\footnotesize}
+	legend style={draw=none,legend columns=8,column sep=1ex,at={(0.88,-0.6)},anchor=south east,legend cell align=left,align=left,fill=white,font=\footnotesize}
 	%legend style={
 	%	at={(1.02,0)},
 %		anchor=south west,
@@ -25,17 +29,32 @@
 %	}
 ]
 	\addplot[style={bblue,fill=bblue,mark=none}]
-	coordinates {(Wiki, 46.77) (AP,20.61) (CM,21.76) (GR,38.93) (HEP,45.31) (HEPT, 24.71) (SD08, 35.41) (SD09, 35.30)};
+	coordinates {(Wiki, 57.75) (AP,8.01) (CM,15.97) (GR,16.04) (HEP,13.27) (HEPT, 20.96) (SD08, 38.95) (SD09, 43.33)};
 	
 	\addplot[style={rred,fill=rred,mark=none}]
-	coordinates {(Wiki, 62.60) (AP,80.30) (CM,75.02) (GR,75.17) (HEP,86.03) (HEPT, 64.09) (SD08, 83.51) (SD09, 84.84)};
+	coordinates {(Wiki, 69.70) (AP,85.92) (CM,82.27) (GR,63.83) (HEP,81.04) (HEPT, 74.47) (SD08, 72.82) (SD09, 81.46)};
 	
 	\addplot[style={ggreen,fill=ggreen,mark=none}]
-	coordinates {(Wiki, 20.55) (AP,80.44) (CM,77.39) (GR,73.15) (HEP,83.00) (HEPT, 63.32) (SD08, 66.93) (SD09, 78.53)};
+	coordinates {(Wiki, 64.86) (AP,78.32) (CM,79.76) (GR,73.2) (HEP,76.12) (HEPT, 71.21) (SD08, 69.60) (SD09, 72.73)};
 	
 	\addplot[style={ppurple,fill=ppurple,mark=none}]
-	coordinates {(Wiki, 44.9) (AP,77.66) (CM,76.120) (GR,71.140) (HEP,74.95) (HEPT, 52.900) (SD08, 56.3) (SD09, 55.4)};
+	coordinates {(Wiki, 22.82) (AP,79.87) (CM,77.18) (GR,79.19) (HEP,75.17) (HEPT, 75.84) (SD08, 53.02) (SD09, 53.02)};
 	
-	\legend{Basic Features, Basic and Triad, All Features, Adamic Heuristic}
+	
+	\addplot[style={oorange,fill=oorange,mark=none}]
+	coordinates {(Wiki, 68.06) (AP,85.06) (CM,67.27) (GR,79.37) (HEP,88.51) (HEPT, 47.01) (SD08, 82.21) (SD09, 80.82)};
+	
+	\addplot[style={yyyellow,fill=yyyellow,mark=none}]
+	coordinates {(Wiki, 38.61) (AP,61.78) (CM,64.09) (GR,60.62) (HEP,58.69) (HEPT, 62.55) (SD08, 55.60) (SD09, 62.55)};
+	
+	\addplot[style={bblack,fill=bblack,mark=none}]
+	coordinates {(Wiki, 26.69) (AP,29.9) (CM,30.6) (GR,28.4) (HEP,23.3) (HEPT, 18.9) (SD08, 88.28) (SD09, 87.48)};
+	
+	\addplot[style={ccyan,fill=ccyan,mark=none}]
+	coordinates {(Wiki, 31.4) (AP,25.7) (CM,26.1) (GR,19.4) (HEP,19.3) (HEPT, 22.5) (SD08, 86.2) (SD09, 87.8)};
+	
+	
+	
+	\legend{Wiki,AP,CM,GR, HEP, HEPT,SD08,SD09}
 \end{axis}
 \end{tikzpicture}
